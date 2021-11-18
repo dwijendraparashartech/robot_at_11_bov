@@ -1,7 +1,8 @@
 class Robot
   include ActiveModel::Model
-
   attr_accessor :size_grid, :max_x, :max_y, :x, :y, :f, :commands, :report
+
+
 
   def initialize(params={})
     @x = params[:x].try(:to_i)
@@ -10,12 +11,15 @@ class Robot
     @size_grid = sanitize_size(params[:size_grid])
     @max_x, @max_y = @size_grid.split('x').map(&:to_i)
     @commands = params[:commands] || ""
+    @get_first_value = @commands.first
+    @replace_value = @get_first_value.split(" ").map{ |data| data.upcase}.to_s.gsub(/\"/,'\'').gsub(/[\[\]]/,'').gsub("'", "").gsub(", "," ")
+    @commands[0] = @replace_value
     @report = nil
   end
 
   def execute_commands!
     return unless check_if_robot_is_placed?
-    commands = @commands.first.split(" ") + [@commands.last]
+    commands = @commands.first.split(" ") + [@commands.last.upcase]
     commands.each_with_index do |command, index|
       placing_initial_coordinates(commands[index+1]) if command == "PLACE"
       case command
